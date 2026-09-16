@@ -1,5 +1,6 @@
 # Rust build artifacts
 target/
+clock/pkg/
 
 # macOS metadata
 .DS_Store

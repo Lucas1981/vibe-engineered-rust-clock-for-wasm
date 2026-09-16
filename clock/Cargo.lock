@@ -100,6 +100,7 @@ version = "0.1.0"
 dependencies = [
  "chrono",
  "fontdue",
+ "js-sys",
  "minifb",
  "tiny-skia",
  "wasm-bindgen",

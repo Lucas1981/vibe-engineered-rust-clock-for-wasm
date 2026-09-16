@@ -18,14 +18,17 @@ impl Backend {
         let canvas = document
             .get_element_by_id(CANVAS_ID)
             .ok_or("canvas element #clock not found")?
-            .dyn_into::<HtmlCanvasElement>()?;
+            .dyn_into::<HtmlCanvasElement>()
+            .map_err(|_| "element #clock is not a canvas")?;
         canvas.set_width(width);
         canvas.set_height(height);
 
         let context = canvas
-            .get_context("2d")?
+            .get_context("2d")
+            .map_err(|err| js_error("canvas getContext failed", err))?
             .ok_or("canvas 2d context unavailable")?
-            .dyn_into::<CanvasRenderingContext2d>()?;
+            .dyn_into::<CanvasRenderingContext2d>()
+            .map_err(|_| "canvas 2d context has wrong type")?;
 
         Ok(Self {
             context,
@@ -43,8 +46,15 @@ impl Backend {
             Clamped(pixmap.data()),
             self.width,
             self.height,
-        )?;
-        self.context.put_image_data(&image, 0.0, 0.0)?;
+        )
+        .map_err(|err| js_error("ImageData creation failed", err))?;
+        self.context
+            .put_image_data(&image, 0.0, 0.0)
+            .map_err(|err| js_error("putImageData failed", err))?;
         Ok(())
     }
+}
+
+fn js_error(context: &str, err: wasm_bindgen::JsValue) -> Box<dyn std::error::Error> {
+    format!("{context}: {err:?}").into()
 }
